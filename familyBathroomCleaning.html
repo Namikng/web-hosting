@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가족 화장실 청소 일정표</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .setup-section {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #e3e8ff;
+        }
+        
+        .setup-section h3 {
+            color: #4c63d2;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .item-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        
+        .item-input input {
+            flex: 1;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.1em;
+            padding: 15px 30px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            font-size: 0.9em;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .schedule-display {
+            display: none;
+        }
+        
+        .current-week {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .current-week h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        .current-assignments {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .member-assignment {
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        
+        .member-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .task-list li {
+            padding: 8px 0;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .task-list li:before {
+            content: "🧽";
+            margin-right: 8px;
+        }
+        
+        .deep-task:before {
+            content: "✨";
+        }
+        
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .week-card {
+            background: white;
+            border: 3px solid #e3e8ff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .week-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .week-card.current {
+            border-color: #4facfe;
+            box-shadow: 0 15px 35px rgba(79, 172, 254, 0.3);
+            transform: scale(1.02);
+        }
+        
+        .week-card.deep-clean {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #fff8f8 0%, #ffe8e8 100%);
+        }
+        
+        .week-header {
+            font-weight: 700;
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .week-badge {
+            background: #4facfe;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .deep-clean-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        
+        .member-card {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .deep-clean .member-card {
+            background: #fff5f5;
+            border-left-color: #ff6b6b;
+        }
+        
+        .member-card-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .card-task-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .card-task-list li {
+            padding: 5px 0;
+            color: #555;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-task-list li:before {
+            content: "🧽";
+            margin-right: 8px;
+        }
+        
+        .deep-clean .card-task-list .deep-task:before {
+            content: "✨";
+        }
+        
+        .explanation {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #2d3436;
+        }
+        
+        .explanation h4 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .current-assignments {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 가족 화장실 청소 순환표</h1>
+            <p>모두 함께하는 깨끗한 화장실 만들기!</p>
+        </div>
+        
+        <div class="content">
+            <div class="setup-section" id="setupSection">
+                <h3>👨‍👩‍👧‍👦 가족 구성원</h3>
+                <div class="input-group">
+                    <div id="membersList">
+                        <div class="item-input">
+                            <input type="text" placeholder="이름을 입력하세요" class="member-name">
+                            <button class="btn btn-danger" onclick="removeItem(this, 'member')">삭제</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addMember()">+ 구성원 추가</button>
+                </div>
+                
+                <h3>🧽 기본 청소 항목 (매주 순환)</h3>
+                <div class="input-group">
+                    <div id="basicTasksList">
+                        <div class="item-input">
+                            <input type="text" placeholder="예: 변기 청소" class="basic-task">
+                            <button class="btn btn-danger" onclick="removeItem(this, 'basic')">삭제</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addBasicTask()">+ 기본 항목 추가</button>
+                </div>
+                
+                <h3>✨ 대청소 추가 항목 (2주마다 순환)</h3>
+                <div class="input-group">
+                    <div id="deepTasksList">
+                        <div class="item-input">
+                            <input type="text" placeholder="예: 욕조 청소" class="deep-task">
+                            <button class="btn btn-danger" onclick="removeItem(this, 'deep')">삭제</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addDeepTask()">+ 대청소 항목 추가</button>
+                </div>
+                
+                <div class="input-group">
+                    <label>📅 첫 번째 주말 날짜</label>
+                    <input type="date" id="startDate">
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateSchedule()">✨ 일정표 만들기</button>
+            </div>
+            
+            <div class="schedule-display" id="scheduleDisplay">
+                <div class="explanation">
+                    <h4>💡 청소 시스템 설명</h4>
+                    <p>• 매주 모든 가족이 참여해요<br>
+                    • 기본 청소 항목들이 매주 순환하면서 배정돼요<br>
+                    • 2주마다 대청소 주간에는 추가 항목들도 함께!<br>
+                    • 대청소 항목들도 2주마다 순환해요</p>
+                </div>
+                
+                <div class="current-week" id="currentWeek">
+                    <!-- 현재 주 정보가 여기에 표시됩니다 -->
+                </div>
+                
+                <div class="schedule-grid" id="scheduleGrid">
+                    <!-- 일정표가 여기에 표시됩니다 -->
+                </div>
+                
+                <button class="btn btn-secondary" onclick="editSettings()">설정 수정</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 다음 주말을 기본값으로 설정
+        const today = new Date();
+        const nextSaturday = new Date();
+        const daysUntilSaturday = (6 - today.getDay()) % 7;
+        nextSaturday.setDate(today.getDate() + (daysUntilSaturday === 0 ? 7 : daysUntilSaturday));
+        document.getElementById('startDate').valueAsDate = nextSaturday;
+        
+        // 초기 예시 데이터
+        function initializeData() {
+            // 기본 구성원들
+            const memberInputs = document.querySelectorAll('.member-name');
+            memberInputs[0].value = '엄마';
+            addMember();
+            document.querySelectorAll('.member-name')[1].value = '아빠';
+            addMember();
+            document.querySelectorAll('.member-name')[2].value = '첫째';
+            
+            // 기본 청소 항목들
+            const basicInputs = document.querySelectorAll('.basic-task');
+            basicInputs[0].value = '변기 청소';
+            addBasicTask();
+            document.querySelectorAll('.basic-task')[1].value = '바닥 청소';
+            addBasicTask();
+            document.querySelectorAll('.basic-task')[2].value = '세면대 청소';
+            
+            // 대청소 항목들
+            const deepInputs = document.querySelectorAll('.deep-task');
+            deepInputs[0].value = '욕조 청소';
+            addDeepTask();
+            document.querySelectorAll('.deep-task')[1].value = '타일 청소';
+            addDeepTask();
+            document.querySelectorAll('.deep-task')[2].value = '환풍기 청소';
+        }
+        
+        initializeData();
+        
+        function addMember() {
+            const container = document.getElementById('membersList');
+            addItemInput(container, 'member-name', '이름을 입력하세요');
+        }
+        
+        function addBasicTask() {
+            const container = document.getElementById('basicTasksList');
+            addItemInput(container, 'basic-task', '청소 항목을 입력하세요');
+        }
+        
+        function addDeepTask() {
+            const container = document.getElementById('deepTasksList');
+            addItemInput(container, 'deep-task', '대청소 항목을 입력하세요');
+        }
+        
+        function addItemInput(container, className, placeholder) {
+            const div = document.createElement('div');
+            div.className = 'item-input';
+            div.innerHTML = `
+                <input type="text" placeholder="${placeholder}" class="${className}">
+                <button class="btn btn-danger" onclick="removeItem(this, '${className.split('-')[0]}')">삭제</button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function removeItem(button, type) {
+            const container = document.getElementById(type === 'member' ? 'membersList' : 
+                                                 type === 'basic' ? 'basicTasksList' : 'deepTasksList');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            }
+        }
+        
+        function generateSchedule() {
+            const members = getInputValues('.member-name');
+            const basicTasks = getInputValues('.basic-task');
+            const deepTasks = getInputValues('.deep-task');
+            const startDate = new Date(document.getElementById('startDate').value);
+            
+            // 유효성 검사
+            if (members.length === 0) {
+                alert('가족 구성원을 입력해주세요.');
+                return;
+            }
+            if (basicTasks.length === 0) {
+                alert('기본 청소 항목을 입력해주세요.');
+                return;
+            }
+            
+            displaySchedule(members, basicTasks, deepTasks, startDate);
+        }
+        
+        function getInputValues(selector) {
+            return Array.from(document.querySelectorAll(selector))
+                .map(input => input.value.trim())
+                .filter(value => value !== '');
+        }
+        
+        function displaySchedule(members, basicTasks, deepTasks, startDate) {
+            document.getElementById('setupSection').style.display = 'none';
+            document.getElementById('scheduleDisplay').style.display = 'block';
+            
+            const currentWeekDiv = document.getElementById('currentWeek');
+            const scheduleGrid = document.getElementById('scheduleGrid');
+            
+            // 현재 주 계산
+            const today = new Date();
+            const diffTime = Math.abs(today - startDate);
+            const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+            const currentWeekNumber = today > startDate ? diffWeeks + 2 : 1;
+            
+            // 현재 주 표시
+            displayCurrentWeek(currentWeekDiv, currentWeekNumber, members, basicTasks, deepTasks, startDate);
+            
+            // 전체 일정표 생성
+            scheduleGrid.innerHTML = '';
+            for (let week = 1; week <= 8; week++) {
+                const weekCard = createWeekCard(week, currentWeekNumber, members, basicTasks, deepTasks, startDate);
+                scheduleGrid.appendChild(weekCard);
+            }
+        }
+        
+        function displayCurrentWeek(container, weekNumber, members, basicTasks, deepTasks, startDate) {
+            const isDeepClean = weekNumber % 2 === 0;
+            const weekDate = new Date(startDate);
+            weekDate.setDate(startDate.getDate() + (weekNumber - 1) * 7);
+            
+            const assignments = getWeekAssignments(weekNumber, members, basicTasks, deepTasks);
+            
+            container.innerHTML = `
+                <h2>이번 주말 ${isDeepClean ? '✨ 대청소' : '🧽 기본청소'} (${weekNumber}주차)</h2>
+                <p style="text-align: center; margin-bottom: 20px; font-size: 1.1em;">${weekDate.getMonth() + 1}월 ${weekDate.getDate()}일</p>
+                <div class="current-assignments">
+                    ${assignments.map(assignment => `
+                        <div class="member-assignment">
+                            <div class="member-name">${assignment.member}</div>
+                            <ul class="task-list">
+                                ${assignment.tasks.map(task => `
+                                    <li class="${task.isDeep ? 'deep-task' : ''}">${task.name}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function createWeekCard(weekNumber, currentWeek, members, basicTasks, deepTasks, startDate) {
+            const isDeepClean = weekNumber % 2 === 0;
+            const isCurrent = weekNumber === currentWeek;
+            const weekDate = new Date(startDate);
+            weekDate.setDate(startDate.getDate() + (weekNumber - 1) * 7);
+            
+            const assignments = getWeekAssignments(weekNumber, members, basicTasks, deepTasks);
+            
+            const card = document.createElement('div');
+            card.className = `week-card ${isCurrent ? 'current' : ''} ${isDeepClean ? 'deep-clean' : ''}`;
+            
+            card.innerHTML = `
+                <div class="week-header">
+                    <span>${weekDate.getMonth() + 1}/${weekDate.getDate()}</span>
+                    <span class="week-badge ${isDeepClean ? 'deep-clean-badge' : ''}">${weekNumber}주차${isDeepClean ? ' 대청소' : ''}</span>
+                </div>
+                ${assignments.map(assignment => `
+                    <div class="member-card">
+                        <div class="member-card-name">${assignment.member}</div>
+                        <ul class="card-task-list">
+                            ${assignment.tasks.map(task => `
+                                <li class="${task.isDeep ? 'deep-task' : ''}">${task.name}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `).join('')}
+            `;
+            
+            return card;
+        }
+        
+        function getWeekAssignments(weekNumber, members, basicTasks, deepTasks) {
+            const isDeepClean = weekNumber % 2 === 0;
+            const assignments = [];
+            
+            // 기본 항목 순환 인덱스 계산
+            const basicStartIndex = (weekNumber - 1) % basicTasks.length;
+            
+            // 대청소 항목 순환 인덱스 계산 (2주마다)
+            const deepWeekCount = Math.floor((weekNumber - 1) / 2);
+            const deepStartIndex = deepWeekCount % (deepTasks.length || 1);
+            
+            for (let i = 0; i < members.length; i++) {
+                const member = members[i];
+                const tasks = [];
+                
+                // 기본 청소 항목 배정 (순환)
+                if (basicTasks.length > 0) {
+                    const basicIndex = (basicStartIndex + i) % basicTasks.length;
+                    tasks.push({
+                        name: basicTasks[basicIndex],
+                        isDeep: false
+                    });
+                }
+                
+                // 대청소 항목 배정 (2주마다, 순환)
+                if (isDeepClean && deepTasks.length > 0) {
+                    const deepIndex = (deepStartIndex + i) % deepTasks.length;
+                    tasks.push({
+                        name: deepTasks[deepIndex],
+                        isDeep: true
+                    });
+                }
+                
+                assignments.push({
+                    member: member,
+                    tasks: tasks
+                });
+            }
+            
+            return assignments;
+        }
+        
+        function editSettings() {
+            document.getElementById('setupSection').style.display = 'block';
+            document.getElementById('scheduleDisplay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
