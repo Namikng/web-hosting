@@ -234,13 +234,13 @@
         document.getElementById('weekTitle').textContent = 
             `이번 주말 ${isDeep ? '✨ 대청소' : '🧽 기본청소'} (${weekNumber}주차)`;
 
-        // 이번 주의 기간 안내
-        const periodStart = new Date(weekDate);
-        const periodEnd = new Date(weekDate);
-        periodEnd.setDate(periodEnd.getDate() + 6);
-        document.getElementById('dateLabel').textContent =
-            `청소 기간: ${periodStart.getMonth() + 1}월 ${periodStart.getDate()}일 ~ ${periodEnd.getMonth() + 1}월 ${periodEnd.getDate()}일`;
+        // 결과 안내문구에서
+        const weekendStart = new Date(weekDate); // 기준일(토요일)
+        const weekendEnd = new Date(weekendStart);
+        weekendEnd.setDate(weekendStart.getDate() + 1); // 일요일
 
+        document.getElementById('dateLabel').textContent = `이번 주 주말: ${weekendStart.getMonth() + 1}월 ${weekendStart.getDate()}일(토) ~ ${weekendEnd.getMonth() + 1}월 ${weekendEnd.getDate()}일(일)`;
+        
         // 담당 청소 목록
         const myTasks = getMyTasks(member, weekNumber);
         const taskList = document.getElementById('taskList');
