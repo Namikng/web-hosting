@@ -143,7 +143,7 @@
     const members = ['남이', '경희', '효진'];
     const basicTasks = ['변기 청소', '세면대 청소', '바닥 청소'];
     const deepTasks = ['욕조 벽 청소', '욕조 청소', '욕조 외벽 청소'];
-    const startDate = new Date('2025-09-06'); // 첫 주말 날짜 (수정 가능)
+    const startDate = new Date('2025-09-06'); // 2025년 9월 6일 (토요일)
 
     // ===== 이름 선택/저장/변경 =====
     const MEMBER_KEY = 'bathroomCleaningMember';
@@ -164,26 +164,27 @@
         const today = new Date();
         today.setHours(0,0,0,0);
 
-        // startDate가 금요일이 아니면, 이전 금요일로 맞추기
-        let baseFriday = new Date(startDate);
-        if (baseFriday.getDay() !== 5) {
-            // 금요일(5)로 이동: (요일+2)%7 만큼 빼면 이전 금요일
-            baseFriday.setDate(baseFriday.getDate() - ((baseFriday.getDay() + 2) % 7));
+        // startDate가 토요일이면, 그 전날(금요일)로 기준 맞추기
+        let baseSaturday = new Date(startDate);
+        // baseSaturday는 토요일이어야 함, 만약 아니면 가장 가까운 이전 토요일로 이동
+        if (baseSaturday.getDay() !== 6) {
+            baseSaturday.setDate(baseSaturday.getDate() - ((baseSaturday.getDay() + 1) % 7));
         }
 
-        const diffTime = today - baseFriday;
+        // 실제 주차(토요일~다음주 금요일까지)로 나누어서 주차 계산
+        const diffTime = today - baseSaturday;
         const weekNum = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7)) + 1;
         return weekNum > 0 ? weekNum : 1;
     }
 
     function getWeekDate(weekNumber, startDate) {
-        // weekNumber번째 금요일 날짜 반환
-        let baseFriday = new Date(startDate);
-        if (baseFriday.getDay() !== 5) {
-            baseFriday.setDate(baseFriday.getDate() - ((baseFriday.getDay() + 2) % 7));
+        // weekNumber 번째 토요일 날짜 반환
+        let baseSaturday = new Date(startDate);
+        if (baseSaturday.getDay() !== 6) {
+            baseSaturday.setDate(baseSaturday.getDate() - ((baseSaturday.getDay() + 1) % 7));
         }
-        baseFriday.setDate(baseFriday.getDate() + (weekNumber - 1) * 7);
-        return baseFriday;
+        baseSaturday.setDate(baseSaturday.getDate() + (weekNumber - 1) * 7);
+        return baseSaturday;
     }
 
     function getMyTasks(member, weekNumber) {
@@ -203,6 +204,12 @@
             myTasks.push({ name: deepTasks[deepIndex], isDeep: true });
         }
         return myTasks;
+    }
+
+    // ===== 한글 요일 표시 =====
+    function getKoreanDayName(date) {
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        return days[date.getDay()];
     }
 
     // ===== UI 표시 =====
@@ -232,15 +239,15 @@
 
         document.getElementById('selectedMember').textContent = `👤 현재 이름: ${member}`;
         document.getElementById('weekTitle').textContent = 
-            `이번 주말 ${isDeep ? '✨ 대청소' : '🧽 기본청소'} (${weekNumber}주차)`;
+            `${isDeep ? '✨ 대청소' : '🧽 기본청소'} (${weekNumber}주차)`;
 
-        // 결과 안내문구에서
-        const weekendStart = new Date(weekDate); // 기준일(토요일)
-        const weekendEnd = new Date(weekendStart);
-        weekendEnd.setDate(weekendStart.getDate() + 1); // 일요일
+        // "기간: 9월 6일(토) ~ 9월 7일(일)" 안내
+        const weekendStart = new Date(weekDate); // 토요일
+        const weekendEnd = new Date(weekDate);
+        weekendEnd.setDate(weekendEnd.getDate() + 1); // 일요일
+        document.getElementById('dateLabel').textContent =
+          `기간: ${weekendStart.getMonth() + 1}월 ${weekendStart.getDate()}일(${getKoreanDayName(weekendStart)}) ~ ${weekendEnd.getMonth() + 1}월 ${weekendEnd.getDate()}일(${getKoreanDayName(weekendEnd)})`;
 
-        document.getElementById('dateLabel').textContent = `이번 주 주말: ${weekendStart.getMonth() + 1}월 ${weekendStart.getDate()}일(토) ~ ${weekendEnd.getMonth() + 1}월 ${weekendEnd.getDate()}일(일)`;
-        
         // 담당 청소 목록
         const myTasks = getMyTasks(member, weekNumber);
         const taskList = document.getElementById('taskList');
