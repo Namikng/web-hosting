@@ -56,6 +56,13 @@
             margin-top: 20px;
             text-align: center;
         }
+        .selected-member {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #324da8;
+            margin-bottom: 12px;
+            text-align: center;
+        }
         .week-title {
             font-size: 1.4em;
             margin-bottom: 10px;
@@ -118,6 +125,7 @@
             <button id="selectBtn">확인</button>
         </div>
         <div id="resultSection" class="result-section" style="display:none;">
+            <div class="selected-member" id="selectedMember"></div>
             <div class="week-title" id="weekTitle"></div>
             <div class="date-label" id="dateLabel"></div>
             <div class="your-tasks">
@@ -132,10 +140,10 @@
     </div>
     <script>
     // ===== 하드코딩: 가족 구성, 항목, 시작 날짜 =====
-    const members = ['남이', '경희', '효진'];
-    const basicTasks = ['변기 청소', '세면대 청소', '바닥 청소'];
-    const deepTasks = ['욕조벽 청소', '욕조 청소', '욕조 외벽 청소'];
-    const startDate = new Date('2025-09-06'); // 첫 주말 날짜 (수정 가능)
+    const members = ['엄마', '아빠', '첫째', '둘째'];
+    const basicTasks = ['변기 청소', '바닥 청소', '세면대 청소', '수납장 정리'];
+    const deepTasks = ['욕조 청소', '타일 청소', '환풍기 청소', '벽면 곰팡이 점검'];
+    const startDate = new Date('2024-09-07'); // 첫 주말 날짜 (수정 가능)
 
     // ===== 이름 선택/저장/변경 =====
     const MEMBER_KEY = 'bathroomCleaningMember';
@@ -152,18 +160,30 @@
 
     // ===== 담당 청소 계산 =====
     function getCurrentWeekNumber(startDate) {
-        // 오늘 날짜 기준 startDate로부터 몇 주차인지
+        // 금요일 0시를 기준으로 주차를 계산
         const today = new Date();
         today.setHours(0,0,0,0);
-        const diffTime = today - startDate;
+
+        // startDate가 금요일이 아니면, 이전 금요일로 맞추기
+        let baseFriday = new Date(startDate);
+        if (baseFriday.getDay() !== 5) {
+            // 금요일(5)로 이동: (요일+2)%7 만큼 빼면 이전 금요일
+            baseFriday.setDate(baseFriday.getDate() - ((baseFriday.getDay() + 2) % 7));
+        }
+
+        const diffTime = today - baseFriday;
         const weekNum = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7)) + 1;
         return weekNum > 0 ? weekNum : 1;
     }
 
     function getWeekDate(weekNumber, startDate) {
-        const d = new Date(startDate);
-        d.setDate(d.getDate() + (weekNumber - 1) * 7);
-        return d;
+        // weekNumber번째 금요일 날짜 반환
+        let baseFriday = new Date(startDate);
+        if (baseFriday.getDay() !== 5) {
+            baseFriday.setDate(baseFriday.getDate() - ((baseFriday.getDay() + 2) % 7));
+        }
+        baseFriday.setDate(baseFriday.getDate() + (weekNumber - 1) * 7);
+        return baseFriday;
     }
 
     function getMyTasks(member, weekNumber) {
@@ -210,11 +230,16 @@
         const isDeep = weekNumber % 2 === 0;
         const weekDate = getWeekDate(weekNumber, startDate);
 
+        document.getElementById('selectedMember').textContent = `👤 현재 이름: ${member}`;
         document.getElementById('weekTitle').textContent = 
             `이번 주말 ${isDeep ? '✨ 대청소' : '🧽 기본청소'} (${weekNumber}주차)`;
 
+        // 이번 주의 기간 안내
+        const periodStart = new Date(weekDate);
+        const periodEnd = new Date(weekDate);
+        periodEnd.setDate(periodEnd.getDate() + 6);
         document.getElementById('dateLabel').textContent =
-            `${weekDate.getMonth() + 1}월 ${weekDate.getDate()}일`;
+            `청소 기간: ${periodStart.getMonth() + 1}월 ${periodStart.getDate()}일 ~ ${periodEnd.getMonth() + 1}월 ${periodEnd.getDate()}일`;
 
         // 담당 청소 목록
         const myTasks = getMyTasks(member, weekNumber);
